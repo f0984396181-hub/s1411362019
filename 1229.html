@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汽車科專屬 - 即時彈幕留言板</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #ff0000 0%, #2a2121 100%);
+            overflow: hidden; /* 防止彈幕造成捲軸 */
+        }
+        
+        /* 彈幕容器 */
+        #danmaku-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 70%; /* 只佔上方 70%，避免遮擋下方操作區 */
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .danmaku {
+            position: absolute;
+            white-space: nowrap;
+            font-weight: bold;
+            font-size: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            animation: moveRightToLeft linear forwards;
+        }
+
+        @keyframes moveRightToLeft {
+            from { transform: translateX(100vw); }
+            to { transform: translateX(-100%); }
+        }
+
+        /* 控制面板玻璃擬態 */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col justify-end p-8 text-white">
+
+    <div id="danmaku-container"></div>
+
+    <div class="glass-panel max-w-4xl mx-auto w-full p-6 rounded-2xl shadow-2xl z-20">
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-2xl font-black italic tracking-tighter italic">
+                AUTO-TECH <span class="text-red-500">ENGINEERING</span>
+            </h1>
+            <div class="flex items-center gap-2 bg-black/30 px-3 py-1 rounded-full">
+                <div id="status-dot" class="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_8px_#ef4444]"></div>
+                <span id="status-text" class="text-xs font-mono uppercase">Disconnected</span>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-4 items-center">
+            <select id="color-picker" class="bg-gray-800 border border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="#FFFFFF">純潔白 (珍珠漆)</option>
+                <option value="#FF3E3E">法拉利紅 (熱血)</option>
+                <option value="#00D2FF">氮氣藍 (動力)</option>
+                <option value="#32FF7E">萊姆綠 (螢光)</option>
+                <option value="#FAD390">金屬橘 (經典)</option>
+            </select>
+
+            <input type="text" id="message-input" placeholder="輸入留言，加速發送..." 
+                class="flex-1 bg-gray-800 border border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+
+            <button onclick="sendMessage()" 
+                class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-lg transition-all active:scale-95 shadow-lg">
+                發射 🏎️💨
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const container = document.getElementById('danmaku-container');
+        const input = document.getElementById('message-input');
+        const colorPicker = document.getElementById('color-picker');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+
+        // WebSocket 初始化
+        const ws = new WebSocket('ws://localhost:8080');
+
+        ws.onopen = () => {
+            statusDot.classList.replace('bg-red-500', 'bg-green-500');
+            statusDot.classList.replace('shadow-[0_0_8px_#ef4444]', 'shadow-[0_0_8px_#22c55e]');
+            statusText.innerText = 'System Online';
+        };
+
+        ws.onclose = () => {
+            statusDot.classList.replace('bg-green-500', 'bg-red-500');
+            statusText.innerText = 'Offline';
+        };
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            createDanmaku(data.text, data.color);
+        };
+
+        function sendMessage() {
+            const text = input.value.trim();
+            if (text === "") return;
+
+            const payload = {
+                text: text,
+                color: colorPicker.value
+            };
+
+            ws.send(JSON.stringify(payload));
+            input.value = "";
+        }
+
+        function createDanmaku(text, color) {
+            const el = document.createElement('div');
+            el.className = 'danmaku';
+            el.innerText = text;
+            el.style.color = color;
+            
+            // 隨機高度 (避開下方操作區)
+            const top = Math.floor(Math.random() * 80);
+            el.style.top = `${top}%`;
+            
+            // 隨機速度 (8-12秒)
+            const duration = 8 + Math.random() * 4;
+            el.style.animationDuration = `${duration}s`;
+
+            container.appendChild(el);
+
+            // 動畫結束後移除元素，節省記憶體
+            el.addEventListener('animationend', () => {
+                el.remove();
+            });
+        }
+
+        // 支援 Enter 鍵發送
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
