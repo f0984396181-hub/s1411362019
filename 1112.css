@@ -1,0 +1,68 @@
+/* 主題顏色 */
+:root {
+  --primary-red: #f87171;
+  --primary-yellow: #facc15;
+  --primary-blue: #60a5fa;
+  --primary-green: #4ade80;
+  --bg-gradient: linear-gradient(to br, #1f2937, #000000, #7f1d1d);
+  --card-bg: #1f2937;
+  --card-hover-scale: 1.05;
+}
+
+/* 全域 */
+body {
+  background: var(--bg-gradient);
+  color: rgb(18, 58, 205);
+  font-family: 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+}
+
+/* Navbar */
+header nav ul li a:hover {
+  color: var(--primary-red);
+}
+
+/* Banner */
+#banner h1 {
+  color: var(--primary-red);
+  text-shadow: 2px 2px 6px #000;
+}
+
+/* 活動卡片 */
+#cards .card {
+  background: var(--card-bg);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+
+#cards .card:hover {
+  transform: scale(var(--card-hover-scale));
+}
+
+/* 彈幕區 */
+#danmakuSection {
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(5px);
+  border-radius: 0.75rem;
+}
+
+#danmakuSection h2 {
+  color: var(--primary-red);
+}
+
+.danmaku-msg {
+  position: absolute;
+  white-space: nowrap;
+  font-weight: bold;
+  font-size: 1.25rem;
+  text-shadow: 2px 2px 4px #000;
+}
+
+/* Footer */
+footer {
+  background: #111111;
+  color: #aaa;
+  padding: 1.5rem 0;
+  text-align: center;
+}
