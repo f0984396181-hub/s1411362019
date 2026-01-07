@@ -66,3 +66,13 @@ footer {
   padding: 1.5rem 0;
   text-align: center;
 }
+/* style.css 新增或修改 */
+#danmakuArea {
+  position: fixed;  /* 從 absolute 改 fixed */
+  top: 80px;        /* 避開 navbar 高度 */
+  left: 0;
+  width: 100%;
+  height: 50vh;     /* 僅占上半部 */
+  pointer-events: none;
+  z-index: 50;      /* 確保在其他內容上方 */
+}
