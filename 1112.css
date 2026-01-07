@@ -12,9 +12,11 @@
 /* 全域 */
 body {
   background: var(--bg-gradient);
-  color: rgb(18, 58, 205);
+  color: rgb(230, 12, 12);
   font-family: 'Segoe UI', sans-serif;
   overflow-x: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 /* Navbar */
@@ -41,16 +43,17 @@ header nav ul li a:hover {
 }
 
 /* 彈幕區 */
-#danmakuSection {
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(5px);
-  border-radius: 0.75rem;
+#danmakuArea {
+  position: fixed;
+  top: 80px;        /* 避開 navbar */
+  left: 0;
+  width: 100%;
+  height: 50vh;     /* 上半屏漂浮 */
+  pointer-events: none;
+  z-index: 50;
 }
 
-#danmakuSection h2 {
-  color: var(--primary-red);
-}
-
+/* 彈幕訊息 */
 .danmaku-msg {
   position: absolute;
   white-space: nowrap;
@@ -59,20 +62,23 @@ header nav ul li a:hover {
   text-shadow: 2px 2px 4px #000;
 }
 
+/* 彈幕操作區 */
+#danmakuSection {
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(5px);
+  border-radius: 0.75rem;
+  margin: 4rem 1.5rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Footer */
 footer {
   background: #111111;
   color: #aaa;
   padding: 1.5rem 0;
   text-align: center;
-}
-/* style.css 新增或修改 */
-#danmakuArea {
-  position: fixed;  /* 從 absolute 改 fixed */
-  top: 80px;        /* 避開 navbar 高度 */
-  left: 0;
-  width: 100%;
-  height: 50vh;     /* 僅占上半部 */
-  pointer-events: none;
-  z-index: 50;      /* 確保在其他內容上方 */
 }
