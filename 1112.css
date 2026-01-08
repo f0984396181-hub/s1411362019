@@ -1,60 +1,13 @@
-
-
-
 body {
   margin: 0;
   font-family: 'Segoe UI', sans-serif;
-  color: #08541c;
+  color: #00aaff;
   background: var(--bg-gradient);
   overflow-x: hidden;
 }
 
 header nav ul li a:hover {
   color: var(--primary-orange);
-}
-
-/* Banner */
-#banner {
-  height: 80vh;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(to bottom, #60a5fa, #f97316);
-  overflow: hidden;
-}
-
-#banner h1 {
-  font-size: 4rem;
-  font-weight: bold;
-  text-shadow: 2px 2px 8px rgba(0,0,0,0.5);
-  margin-bottom: 1rem;
-  text-align: center;
-}
-
-#banner p {
-  font-size: 1.5rem;
-  text-align: center;
-  max-width: 600px;
-  text-shadow: 1px 1px 6px rgba(0,0,0,0.4);
-  margin-bottom: 2rem;
-}
-
-#banner button {
-  background-color: var(--primary-orange);
-  padding: 0.75rem 2rem;
-  border-radius: 0.75rem;
-  border: none;
-  font-size: 1.2rem;
-  cursor: pointer;
-  color: #1eb4a8;
-  transition: 0.3s;
-  box-shadow: 2px 4px 12px rgba(0,0,0,0.4);
-}
-
-#banner button:hover {
-  background-color: #fb923c;
 }
 
 /* Cards */
@@ -104,7 +57,7 @@ header nav ul li a:hover {
 }
 
 #cards .card p {
-  color: #0066ff;
+  color: #0b5929;
   font-size: 1rem;
 }
 
@@ -158,4 +111,8 @@ footer {
   padding: 1.5rem 0;
   text-align: center;
  
+}
+.color{
+
+  color:royalblue;
 }
