@@ -24,138 +24,96 @@
 <!-- 彈幕區 -->
 <div id="danmakuArea"></div>
 
-<main class="pt-24">
-  <main class="pt-24 bg-gray-50 min-h-screen">
-  <section class="container mx-auto px-6 -mt10 relative z-20">
-  <div class="bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-xl border border-gray-100 max-w-4xl mx-auto">
-    <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+
+  <!-- Banner -->
+  <section id="banner" class="relative h-[75vh] flex flex-col items-center justify-center overflow-hidden bg-slate-900 text-white">
+  <div class="absolute inset-0 z-0">
+    <img src="https://images.unsplash.com/photo-1552334405-4929565998d5?auto=format&fit=crop&q=80&w=2000" class="w-full h-full object-cover">
+    <div class="absolute inset-0 bg-black/50"></div>
+  </div>
+
+  <div class="relative z-10 flex flex-col items-center text-center px-6">
+    <h1 class="text-6xl md:text-8xl font-black mb-10 drop-shadow-2xl tracking-tighter">
+      遇見，台灣之美
+    </h1>
+
+    <div class="flex flex-col lg:flex-row items-center gap-6">
       
-      <div class="flex items-center gap-3 border-b md:border-b-0 md:border-r border-gray-200 pb-2 md:pb-0 md:pr-6">
-        <span id="city" class="text-lg font-bold text-gray-800">📍 讀取中...</span>
-        <span id="current-period" class="text-sm bg-blue-100 text-blue-600 px-2 py-1 rounded-md font-medium">--</span>
-      </div>
-
-      <div id="current" class="flex items-center gap-6">
-        <p class="text-gray-400 text-sm">正在連線天氣衛星...</p>
-      </div>
-
-      <div id="future" class="hidden lg:flex items-center gap-4 border-l  pl-6">
+      <div id="weather-now" class="flex items-center gap-6 px-8 py-4 bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 shadow-xl">
+        <div class="text-left">
+          <p id="city-name" class="text-lg font-bold">📍 讀取中...</p>
+          <p id="now-period" class="text-[10px] opacity-60 uppercase tracking-widest">Loading</p>
         </div>
+        <div id="now-icon" class="text-5xl">--</div>
+        <div class="text-left">
+          <div id="now-temp" class="text-3xl font-black">--°</div>
+          <div id="now-desc" class="text-xs opacity-70">--</div>
+        </div>
+      </div>
+
+      <div id="weather-future" class="flex items-center gap-8 px-8 py-4 bg-black/20 backdrop-blur-sm rounded-3xl border border-white/5">
+        </div>
+      
     </div>
   </div>
 </section>
-  <script>
+<script>
+  (function() {
     const API = "https://nutc-web-vic-peng.zeabur.app/api/weather/kaohsiung";
 
-    function getPeriodText(date) {
-      const h = date.getHours();
+    const getPeriodText = (dateStr) => {
+      const h = new Date(dateStr).getHours();
       if (h >= 6 && h < 12) return "早晨";
       if (h >= 12 && h < 18) return "下午";
       return "晚上";
-    }
+    };
 
-    function getIcon(weather) {
+    const getIcon = (weather) => {
       if (weather.includes("雨")) return "🌧️";
       if (weather.includes("雲")) return "⛅";
       if (weather.includes("晴")) return "☀️";
       return "🌤️";
-    }
+    };
 
-    fetch(API)
-      .then(res => {
-        if (!res.ok) throw new Error("API 無法連線");
-        return res.json();
-      })
-      .then(json => {
+    async function updateWeather() {
+      try {
+        const res = await fetch(API);
+        const json = await res.json();
         const data = json.data;
-        document.getElementById("city").textContent = `📍 ${data.city}即時天氣`;
+        const current = data.forecasts[0];
 
-        const now = new Date();
-        let currentForecast = data.forecasts[0];
+        // 更新即時天氣
+        document.getElementById("city-name").innerText = `📍 ${data.city}`;
+        document.getElementById("now-period").innerText = getPeriodText(current.startTime);
+        document.getElementById("now-icon").innerText = getIcon(current.weather);
+        document.getElementById("now-temp").innerText = `${current.minTemp}°~${current.maxTemp}°`;
+        document.getElementById("now-desc").innerText = `${current.weather} | ☔ ${current.rain}`;
 
-        // 判斷當前時段的預報
-        data.forecasts.forEach(f => {
-          const start = new Date(f.startTime);
-          const end = new Date(f.endTime);
-          if (now >= start && now < end) currentForecast = f;
+        // 更新獨立預報 (取接下來 3 個時段)
+        const futureContainer = document.getElementById("weather-future");
+        futureContainer.innerHTML = ""; // 清空
+
+        data.forecasts.slice(1, 4).forEach(f => {
+          const card = `
+            <div class="flex flex-col items-center gap-1">
+              <span class="text-[10px] text-white/40 uppercase font-medium">${getPeriodText(f.startTime)}</span>
+              <span class="text-2xl">${getIcon(f.weather)}</span>
+              <span class="text-sm font-bold">${f.maxTemp}°</span>
+            </div>
+          `;
+          futureContainer.innerHTML += card;
         });
 
-        // 渲染當前天氣
-        const currentPeriod = getPeriodText(new Date(currentForecast.startTime));
-        const icon = getIcon(currentForecast.weather);
+      } catch (err) {
+        console.error("天氣獲取失敗", err);
+        document.getElementById("city-name").innerText = "服務暫時離線";
+      }
+    }
 
-        document.getElementById("current").innerHTML = `
-          <div class="text-6xl mb-2">${icon}</div>
-          <h2 class="text-2xl font-bold">${currentPeriod}</h2>
-          <p class="text-xl">${currentForecast.weather}</p>
-          <p class="text-3xl font-black my-2">${currentForecast.minTemp}° - ${currentForecast.maxTemp}°</p>
-          <p class="opacity-90">☔ 降雨率 ${currentForecast.rain}</p>
-          <p class="mt-4 text-sm bg-blue-600 px-3 py-1 rounded-full">${currentForecast.comfort}</p>
-        `;
-
-        // 渲染未來預報卡片
-        const futureBox = document.getElementById("future");
-        futureBox.innerHTML = "";
-
-        data.forecasts
-          .filter(f => f !== currentForecast)
-          .forEach(f => {
-            const period = getPeriodText(new Date(f.startTime));
-            const card = document.createElement('div');
-            card.className = "min-w-[140px]  p-4 rounded-xl text-center flex-shrink-0";
-            card.innerHTML = `
-              <div class="text-3xl mb-1">${getIcon(f.weather)}</div>
-              <div class="font-bold text-gray-700">${period}</div>
-              <p class="text-sm text-gray-500">${f.weather}</p>
-              <p class="font-bold text-blue-600">${f.minTemp}°~${f.maxTemp}°</p>
-              <p class="text-xs text-gray-400">☔ ${f.rain}</p>
-            `;
-            futureBox.appendChild(card);
-          });
-      })
-      .catch(err => {
-        console.error(err);
-        document.getElementById("city").textContent = "❌ 無法取得天氣資料";
-        document.getElementById("current").innerHTML = "<p>請檢查 API 位址是否正確或網路連線。</p>";
-      });
-  </script>
-</section>
-</main>
-  <!-- Banner -->
-  <section id="banner" class="relative h-[80vh] flex items-center justify-center overflow-hidden">
-  <div class="absolute inset-0 z-0">
-    <img 
-      src="data:image/jpeg;base64,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" 
-      alt="台灣風景" 
-      class="w-full h-full object-cover scale-105 animate-[pulse_10s_ease-in-out_infinite]"
-    >
-    <div class="absolute inset-0 bg-black/40"></div>
-  </div>
-
-  <div class="relative z-10 text-center text-white px-6">
-    <span class="inline-block px-4 py-1 mb-4 border border-white/50 rounded-full text-sm tracking-widest backdrop-blur-sm">
-      EXPLORE TAIWAN
-    </span>
-    <h1 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter drop-shadow-lg">
-      遇見，台灣之美
-    </h1>
-    <p class="text-lg md:text-xl mb-8 max-w-2xl mx-auto opacity-90 font-light leading-relaxed">
-      從壯麗的太魯閣峽谷到熱鬧的夜市街頭，<br class="hidden md:block">
-      跟著我們的步伐，開啟一場觸動心靈的深度旅程。
-    </p>
-    
-    <div class="flex flex-col md:flex-row gap-4 justify-center">
-      
-    </div>
-  </div>
-
-  <div class="absolute bottom-0 left-0 w-full overflow-hidden leading-[0]">
-    <svg class="relative block w-full h-[60px]" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-      <path d="M600,112.77C268.63,112.77,0,65.52,0,7.23V120H1200V7.23C1200,65.52,931.37,112.77,600,112.77Z" fill="#f9fafb"></path>
-    </svg>
-  </div>
-</section>
-
+    // 初始化
+    updateWeather();
+  })();
+</script>
 
 
   <!-- 活動卡片區 -->
@@ -207,7 +165,7 @@
     <!-- 連線狀態 -->
     <div class="absolute top-4 right-4 flex items-center gap-2 text-white">
       <span id="statusLight" class="w-3 h-3 rounded-full bg-red-500"></span>
-      <span id="statusText">未連線</span>
+      <span id="statusText"></span>
     </div>
   </section>
 
@@ -215,7 +173,7 @@
 
 <!-- Footer -->
 <footer id="contact">
-  <p>聯絡我們: @winbus | 版權所有 &copy; 連瑩遊覽車</p>
+  <p>聯絡我們: @winbus |  &copy; 連瑩遊覽車</p>
 </footer>
 <!-- Modal -->
 <script>
