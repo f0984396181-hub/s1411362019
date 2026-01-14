@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>Vue 起手式</title>
+    <!-- 1. 引入 Vue.js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+
+   <div id="app">
+    <!-- 文字插值 -->
+    <h3>歡迎，{{ username }}</h3>
+
+    <!-- 屬性綁定 (v-bind) -->
+    <img :src=''alt="User Avatar" width="100">
+<br></br>
+    <!-- 雙向綁定 (v-model) -->
+    <label>請輸入你的名字：</label>
+    <input type="text" v-model="username">
+    <p>你在上面輸入的內容，會同步更新到第一行的歡迎詞喔！</p>
+</div>
+<div id="app">
+    <p>目前的數字：{{ count }}</p>
+
+    <!-- 簡單邏輯：點擊直接加 -->
+    <button @click="count++">直接加 1</button>
+
+    <!-- 呼叫 methods：適合複雜邏輯 -->
+    <button @click="addCount(5)">一次加 5</button>
+</div>
+
+<script>
+    Vue.createApp({
+        data() {
+            return {
+                count: 0
+            }
+        },
+        methods: {
+            addCount(num) {
+                this.count += num;
+            }
+        }
+    }).mount('#app');
+</script>
+
+<script>
+    Vue.createApp({
+        data() {
+            return {
+                username: '同學',
+                avatarUrl: '放上你喜歡的圖片~~~~'
+            }
+        }
+    }).mount('#app');
+</script>
+
+
+    
+    
+   
+</body>
+</html>
