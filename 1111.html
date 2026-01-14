@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>國旅報名統計圖表</title>
+    <!-- 1. 引入 Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>國旅報名即時統計</h1>
+    <!-- 2. 準備畫布 (設定寬度以免圖表太大) -->
+    <div style="width: 30vw;">
+        <!-- 畫布 -->
+        <canvas id="dietChart"></canvas>
+    </div>
+
+    <script>
+        // 把你的系烤 Google Sheet CSV 連結貼在這裡
+        const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTLuPkv8b0vvV-Rc4hXWCh-r26ZMMgTbVtulrhgijZ9IfKfm1Nk3ehJSXUZx_bATiTmXIkv0vfm0W1W/pub?output=csv';
+
+        // --- 1. 轉換資料的魔法函式 (CSV -> JSON) ---
+        function csvToJson(csvText) {
+            const lines = csvText.split("\n");
+            const headers = lines[0].split(",");
+            const result = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i]) continue;
+                const currentLine = lines[i].split(",");
+                const obj = {};
+                for (let j = 0; j < headers.length; j++) {
+                    obj[headers[j].trim()] = currentLine[j].trim();
+                }
+                result.push(obj);
+            }
+            return result;
+        }
+
+        // --- 2. 畫圖函式 (Chart.js) ---
+        function drawChart(meat, veg, noBeef) {
+            const ctx = document.getElementById('dietChart');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['東部', '南部', '北部'],
+                    datasets: [{
+                        label: '即時報名人數',
+                        // 這裡使用傳進來的參數 (meat, veg, noBeef)
+                        data: [meat, veg, noBeef],
+                        backgroundColor: ['#FF6384', '#4CAF50', '#FFCE56']
+                    }]
+                }
+            });
+        }
+
+        // --- 3. 主程式：抓取資料並統計 ---
+        fetch(csvUrl)
+            .then(function(response) {
+                return response.text();
+            })
+            .then(function(csvText) {
+                // A. 轉成 JSON
+                const students = csvToJson(csvText);
+
+                // B. 開始統計
+                let meatCount = 0;
+                let vegCount = 0;
+                let noBeefCount = 0;
+
+                students.forEach(function(student) {
+                    const diet = student['想去哪走走']; // 請確認 Google Sheet 欄位名稱是否一致
+
+                    if (diet === '東部') {
+                        meatCount++;
+                    } else if (diet === '南部') {
+                        vegCount++;
+                    } else if (diet === '北部') {
+                        noBeefCount++;
+                    }
+                });
+
+                console.log("統計結果：", meatCount, vegCount, noBeefCount);
+                // C. 畫出圖表
+                drawChart(meatCount, vegCount, noBeefCount);
+            })
+            .catch(function(error) {
+                console.error('讀取失敗:', error);
+            });
+    </script>
+</body>
+</html>
